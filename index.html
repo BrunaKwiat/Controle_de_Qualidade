@@ -3,39 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Importar Dados de Planilha XLSX</title>
+    <title>Leitor e Controle de Planilha Excel</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
+
     <div class="container">
-        <h1>Importar Dados de Planilha Excel (.xlsx)</h1>
-
-        <div class="upload-section">
-            <label for="excelFile">Selecione o arquivo XLSX:</label>
-            <input type="file" id="excelFile" accept=".xlsx, .xls">
-            <button id="importButton">Importar Dados</button>
-        </div>
-
-        <div class="table-section">
-            <h2>Dados Importados</h2>
-            <div class="table-container">
-                <table id="dataTable">
-                    <thead>
-                        <tr>
-                            <th>Liberação</th>
-                            <th>Data</th>
-                            <th>Empreiteira</th>
-                            <th>Obra</th>
-                            <th>Quantidade</th>
-                            <th>Saldo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        </tbody>
+        <h2>Controle de Informações - Excel</h2>
+        <p>Selecione um arquivo Excel (.xlsx, .xls) para visualizar os dados na tabela.</p>
+        <input type="file" id="inputExcel" accept=".xlsx, .xls" />
+        
+        <div class="table-container">
+            <table id="excelTable">
                 </table>
-            </div>
-            <p id="message" class="message"></p>
         </div>
     </div>
 
