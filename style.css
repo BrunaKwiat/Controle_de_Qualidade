@@ -17,7 +17,7 @@ body {
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    max-width: 900px;
+    max-width: 1000px; /* Aumentado para acomodar o formulário e a tabela */
     width: 100%;
     margin-top: 20px;
 }
@@ -26,52 +26,131 @@ h2 {
     color: #2c3e50;
     text-align: center;
     margin-bottom: 25px;
-    font-size: 1.8em;
+    font-size: 2em;
     border-bottom: 2px solid #4CAF50;
     padding-bottom: 10px;
-    display: inline-block; /* Para que a borda só fique abaixo do texto */
+    display: block;
     width: 100%;
 }
 
-p {
-    text-align: center;
+h3 {
+    color: #34495e;
+    margin-top: 30px;
     margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+/* Seção do Formulário */
+.form-section {
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    margin-bottom: 30px;
+    background-color: #fcfcfc;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
     color: #555;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="number"] {
+    width: calc(100% - 22px); /* Ajuste para padding e borda */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     font-size: 1em;
+}
+
+button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    display: block; /* Ocupa a largura total */
+    width: 100%;
+    margin-top: 20px;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+/* Seção de Importação Excel */
+.excel-import-section {
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    margin-bottom: 30px;
+    background-color: #fcfcfc;
+    text-align: center;
+}
+
+.excel-import-section p {
+    margin-bottom: 15px;
+    color: #555;
 }
 
 input[type="file"] {
     display: block;
-    margin: 0 auto 30px auto; /* Centraliza o input */
+    margin: 0 auto;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
     background-color: #f0f0f0;
     cursor: pointer;
     font-size: 1em;
-    width: fit-content;
+    width: fit-content; /* Ajusta a largura ao conteúdo */
 }
 
 input[type="file"]:hover {
     background-color: #e2e2e2;
 }
 
+/* Seção da Tabela */
+.table-section {
+    margin-top: 30px;
+}
+
 .table-container {
     overflow-x: auto; /* Permite rolagem horizontal se a tabela for muito larga */
-    margin-top: 20px;
     border: 1px solid #e0e0e0;
     border-radius: 5px;
-    box-shadow: inset 0 0 8px rgba(0,0,0,0.05); /* Sutil sombra interna */
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
 }
 
 table {
     border-collapse: collapse;
     width: 100%;
     background-color: white;
-    min-width: 600px; /* Garante uma largura mínima para a tabela */
+    min-width: 700px; /* Garante uma largura mínima para a tabela */
 }
 
-th, td {
+table thead th {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+table th, table td {
     border: 1px solid #e0e0e0;
     padding: 12px 15px;
     text-align: left;
@@ -79,38 +158,42 @@ th, td {
     color: #333;
 }
 
-th {
-    background-color: #4CAF50;
-    color: white;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    position: sticky; /* Mantém o cabeçalho visível ao rolar */
-    top: 0;
-    z-index: 10;
+table tbody tr:nth-child(even) {
+    background-color: #f8f8f8;
 }
 
-tr:nth-child(even) {
-    background-color: #f8f8f8; /* Linhas zebradas para melhor legibilidade */
+table tbody tr:hover {
+    background-color: #f1f1f1;
 }
 
-tr:hover {
-    background-color: #f1f1f1; /* Efeito hover nas linhas */
+/* Mensagem de tabela vazia */
+#emptyTableMessage {
+    margin-top: 20px;
+    font-style: italic;
+    color: #888;
 }
 
 /* Responsividade básica */
 @media (max-width: 768px) {
     .container {
-        padding: 20px;
+        padding: 15px;
         margin: 10px;
     }
 
     h2 {
-        font-size: 1.5em;
+        font-size: 1.6em;
     }
 
-    th, td {
+    h3 {
+        font-size: 1.2em;
+    }
+
+    .form-section, .excel-import-section, .table-container {
+        padding: 15px;
+    }
+
+    table th, table td {
         padding: 8px 10px;
-        font-size: 0.9em;
+        font-size: 0.85em;
     }
 }
