@@ -2,13 +2,79 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const inputExcel = document.getElementById('inputExcel');
-    const excelTable = document.getElementById('excelTable');
+    const materialForm = document.getElementById('materialForm');
+    const dataTableBody = document.querySelector('#dataTable tbody');
+    const emptyTableMessage = document.getElementById('emptyTableMessage');
 
+    // Função para adicionar uma nova linha à tabela
+    function addRowToTable(data) {
+        const row = document.createElement('tr');
+
+        // Garante que os dados estão na ordem correta dos cabeçalhos da tabela
+        const orderedKeys = ['LIBERAÇÃO', 'DATA', 'EMPREITEIRA', 'OBRA', 'QTDE', 'SALDO'];
+        
+        orderedKeys.forEach(key => {
+            const td = document.createElement('td');
+            let value = data[key] !== undefined ? data[key] : '';
+
+            // Formatação especial para a data, se for o caso (ex: vinda do Excel como número)
+            if (key === 'DATA' && typeof value === 'number' && value > 1) { // XLSX armazena datas como números (dias desde 1900-01-01)
+                // Converte número de data do Excel para objeto Date
+                const excelDate = new Date((value - (25567 + 1)) * 86400 * 1000); // 25567 é a diferença de dias entre 1900-01-01 e 1970-01-01, +1 para ajuste
+                value = excelDate.toLocaleDateString('pt-BR'); // Formata para DD/MM/AAAA
+            } else if (key === 'DATA' && value instanceof Date) {
+                value = value.toLocaleDateString('pt-BR');
+            } else if (key === 'DATA' && typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                // Se a data vier no formato 'YYYY-MM-DD' (do input type="date"), formata
+                const dateParts = value.split('-');
+                value = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+            }
+
+            td.textContent = value;
+            row.appendChild(td);
+        });
+        dataTableBody.appendChild(row);
+        checkTableContent(); // Verifica se a mensagem de vazio deve ser mostrada
+    }
+
+    // Função para limpar e preencher a tabela a partir de um array de objetos (ou array de arrays)
+    function renderTableFromData(jsonData) {
+        dataTableBody.innerHTML = ''; // Limpa a tabela existente
+
+        if (jsonData.length === 0) {
+            checkTableContent();
+            return;
+        }
+
+        // Se a primeira linha são os cabeçalhos e as demais são dados (vindo do Excel)
+        // A biblioteca XLSX.utils.sheet_to_json(worksheet, { header: 1 }) retorna array de arrays
+        // A biblioteca XLSX.utils.sheet_to_json(worksheet) retorna array de objetos com chaves pelos nomes dos headers
+        
+        // Vamos padronizar para usar objetos com chaves para facilitar a inserção
+        let dataToRender;
+        if (Array.isArray(jsonData[0])) { // Se for array de arrays (resultado de {header:1})
+            const headers = jsonData[0];
+            dataToRender = jsonData.slice(1).map(row => {
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = row[index];
+                });
+                return obj;
+            });
+        } else { // Se já for array de objetos (resultado padrão)
+            dataToRender = jsonData;
+        }
+
+        dataToRender.forEach(item => addRowToTable(item));
+    }
+
+    // Lógica para importar Excel
     inputExcel.addEventListener('change', (e) => {
         const file = e.target.files[0];
 
         if (!file) {
-            excelTable.innerHTML = ""; // Limpa a tabela se nenhum arquivo for selecionado
+            dataTableBody.innerHTML = ''; // Limpa a tabela se nenhum arquivo for selecionado
+            checkTableContent();
             return;
         }
 
@@ -19,61 +85,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = new Uint8Array(event.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 
-                // Pega o nome da primeira aba da planilha
-                const sheetName = workbook.SheetNames[0];
+                const sheetName = workbook.SheetNames[0]; // Pega a primeira aba
                 const worksheet = workbook.Sheets[sheetName];
                 
-                // Converte a planilha para um array de arrays (linha a linha)
-                // { header: 1 } faz com que a primeira linha seja tratada como cabeçalho
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                renderTable(jsonData);
+                // Converte a planilha para um array de objetos, onde as chaves são os cabeçalhos das colunas
+                const jsonData = XLSX.utils.sheet_to_json(worksheet); 
+                
+                renderTableFromData(jsonData);
 
             } catch (error) {
                 console.error("Erro ao ler o arquivo Excel:", error);
-                excelTable.innerHTML = `<p style="color: red; text-align: center;">Ocorreu um erro ao processar o arquivo Excel. Verifique se é um arquivo válido e tente novamente.</p>`;
+                dataTableBody.innerHTML = `<tr><td colspan="6" style="color: red; text-align: center;">Ocorreu um erro ao processar o arquivo Excel. Verifique se é um arquivo válido e tente novamente.</td></tr>`;
+                emptyTableMessage.style.display = 'none'; // Esconde a mensagem de vazio
             }
         };
 
         reader.onerror = (error) => {
             console.error("Erro ao carregar o arquivo:", error);
-            excelTable.innerHTML = `<p style="color: red; text-align: center;">Não foi possível ler o arquivo. Tente novamente.</p>`;
+            dataTableBody.innerHTML = `<tr><td colspan="6" style="color: red; text-align: center;">Não foi possível ler o arquivo. Tente novamente.</td></tr>`;
+            emptyTableMessage.style.display = 'none'; // Esconde a mensagem de vazio
         };
 
         reader.readAsArrayBuffer(file);
     });
 
-    /**
-     * Renderiza os dados da planilha na tabela HTML.
-     * @param {Array<Array<any>>} data Array de arrays contendo os dados da planilha.
-     */
-    function renderTable(data) {
-        excelTable.innerHTML = ""; // Limpa a tabela antes de renderizar novos dados
+    // Lógica para adicionar dados do formulário à tabela
+    materialForm.addEventListener('submit', (e) => {
+        e.preventDefault(); // Impede o envio padrão do formulário
 
-        if (data.length === 0) {
-            excelTable.innerHTML = `<p style="text-align: center;">A planilha está vazia ou não contém dados válidos.</p>`;
-            return;
+        const formData = new FormData(materialForm);
+        const newData = {};
+        for (let [key, value] of formData.entries()) {
+            // Converte os nomes dos campos para maiúsculas para corresponder aos cabeçalhos da tabela
+            newData[key.toUpperCase()] = value;
         }
 
-        // Monta o cabeçalho
-        const headerRow = document.createElement("tr");
-        data[0].forEach(cellText => {
-            const th = document.createElement("th");
-            th.textContent = cellText;
-            headerRow.appendChild(th);
-        });
-        excelTable.appendChild(headerRow);
+        addRowToTable(newData);
+        materialForm.reset(); // Limpa o formulário após adicionar
+    });
 
-        // Monta os dados (começando da segunda linha do jsonData, pois a primeira é o cabeçalho)
-        for (let i = 1; i < data.length; i++) {
-            const rowData = data[i];
-            const tr = document.createElement("tr");
-            rowData.forEach(cellText => {
-                const td = document.createElement("td");
-                td.textContent = cellText === undefined ? '' : cellText; // Trata células vazias
-                tr.appendChild(td);
-            });
-            excelTable.appendChild(tr);
+    // Função para verificar e exibir/esconder a mensagem de "tabela vazia"
+    function checkTableContent() {
+        if (dataTableBody.children.length > 0) {
+            emptyTableMessage.style.display = 'none';
+        } else {
+            emptyTableMessage.style.display = 'block';
         }
     }
+
+    // Chamada inicial para garantir que a mensagem de vazio apareça se a tabela estiver inicialmente vazia
+    checkTableContent();
 });
