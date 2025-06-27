@@ -1,157 +1,229 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de Qualidade e Estoque</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Sistema de Controle - Liberação de Obras</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f5f5f5;
+    }
+    h2 {
+      color: #333;
+    }
+    input, select, button {
+      padding: 8px;
+      margin: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .form-section {
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 6px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+    .button-group {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Sistema de Controle de Qualidade e Estoque</h1>
 
-    <!-- Cadastro de Qualidade -->
-    <section class="card">
-      <h2>Cadastro de Qualidade</h2>
-      <form id="qualityForm">
-        <div class="form-group">
-          <label for="liberacao">Liberação:</label>
-          <input type="text" id="liberacao" placeholder="Digite a liberação" required />
-        </div>
-        <div class="form-group">
-          <label for="data">Data:</label>
-          <input type="date" id="data" required />
-        </div>
-        <div class="form-group">
-          <label for="empreiteira">Empreiteira:</label>
-          <input type="text" id="empreiteira" placeholder="Nome da empreiteira" required />
-        </div>
-        <div class="form-group">
-          <label for="obra">Obra:</label>
-          <input type="text" id="obra" placeholder="Nome da obra" required />
-        </div>
-        <div class="form-group">
-          <label for="qtde">Quantidade:</label>
-          <input type="number" id="qtde" min="0" required />
-        </div>
-        <div class="form-group">
-          <label for="saldo">Saldo:</label>
-          <input type="number" id="saldo" min="0" required />
-        </div>
-        <button type="submit">Adicionar Registro</button>
-      </form>
-    </section>
+  <h2>Sistema de Liberação de Informações</h2>
 
-    <hr />
+  <input type="file" id="inputExcel" accept=".xlsx, .xls" />
 
-    <!-- Filtros e Tabela de Qualidade -->
-    <section class="card">
-      <h2>Registros de Qualidade</h2>
-
-      <!-- Filtros -->
-      <div class="filter-controls">
-        <div class="form-group">
-          <label for="filterLiberacao">Filtrar Liberação:</label>
-          <input type="text" id="filterLiberacao" placeholder="Liberação" />
-        </div>
-        <div class="form-group">
-          <label for="filterData">Filtrar Data:</label>
-          <input type="date" id="filterData" />
-        </div>
-        <div class="form-group">
-          <label for="filterEmpreiteira">Filtrar Empreiteira:</label>
-          <input type="text" id="filterEmpreiteira" placeholder="Empreiteira" />
-        </div>
-        <div class="form-group">
-          <label for="filterObra">Filtrar Obra:</label>
-          <input type="text" id="filterObra" placeholder="Obra" />
-        </div>
-        <div class="form-actions">
-          <button type="button" id="applyFilters">Aplicar Filtros</button>
-          <button type="button" id="clearFilters">Limpar Filtros</button>
-        </div>
-      </div>
-
-      <!-- Importação e Exportação -->
-      <div class="action-buttons">
-        <input type="file" id="excelFileInput" accept=".xlsx, .xls" />
-        <button type="button" id="importExcel">Importar Excel</button>
-        <button type="button" id="generatePdf">Gerar PDF</button>
-      </div>
-
-      <!-- Tabela de Qualidade -->
-      <div class="table-responsive">
-        <table id="qualityTable">
-          <thead>
-            <tr>
-              <th>Liberação</th>
-              <th>Data</th>
-              <th>Empreiteira</th>
-              <th>Obra</th>
-              <th>Qtde</th>
-              <th>Saldo</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <hr />
-
-    <!-- Controle de Estoque -->
-    <section class="card">
-      <h2>Controle de Estoque</h2>
-
-      <div class="form-group">
-        <label for="estoqueAtual">Estoque Atual:</label>
-        <input type="number" id="estoqueAtual" value="100" readonly />
-      </div>
-
-      <h3>Cadastro de Cliente e Alteração de Estoque</h3>
-      <form id="clienteForm">
-        <div class="form-group">
-          <label for="clienteNome">Nome do Cliente:</label>
-          <input type="text" id="clienteNome" required />
-        </div>
-        <div class="form-group">
-          <label for="itemComprado">Item Comprado:</label>
-          <input type="text" id="itemComprado" required />
-        </div>
-        <div class="form-group">
-          <label for="qtdeComprada">Quantidade Comprada:</label>
-          <input type="number" id="qtdeComprada" min="1" required />
-        </div>
-        <div class="form-group">
-          <label for="tipoAlteracaoEstoque">Tipo de Alteração:</label>
-          <select id="tipoAlteracaoEstoque" required>
-            <option value="saida">Saída (Venda)</option>
-            <option value="entrada">Entrada (Devolução/Reposição)</option>
-          </select>
-        </div>
-        <button type="submit">Registrar Cliente e Atualizar Estoque</button>
-      </form>
-
-      <!-- Tabela de Clientes -->
-      <div class="table-responsive">
-        <table id="clienteTable">
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Item Comprado</th>
-              <th>Qtde Comprada</th>
-              <th>Tipo Alteração</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+  <!-- Filtros -->
+  <div class="form-section">
+    <h3>Filtrar Informações</h3>
+    <select id="filtroEmpreiteira" onchange="atualizarTabela()">
+      <option value="">Todas as Empreiteiras</option>
+    </select>
+    <select id="filtroObra" onchange="atualizarTabela()">
+      <option value="">Todas as Obras</option>
+    </select>
   </div>
 
-  <script src="script.js"></script>
+  <!-- Cadastro -->
+  <div class="form-section">
+    <h3>Cadastrar Nova Informação</h3>
+    <input type="text" id="liberacao" placeholder="Liberação" />
+    <input type="date" id="data" />
+    <input type="text" id="empreiteira" placeholder="Empreiteira" />
+    <input type="text" id="obra" placeholder="Obra" />
+    <input type="number" id="qtde" placeholder="Qtde" />
+    <input type="number" id="saldo" placeholder="Saldo" />
+    <button onclick="adicionarLinha()">Adicionar</button>
+  </div>
+
+  <!-- Botão PDF -->
+  <div class="button-group">
+    <button onclick="gerarPDF()">Gerar Relatório PDF</button>
+  </div>
+
+  <table id="excelTable"></table>
+
+  <script>
+    let dadosTabela = [];
+    const tabela = document.getElementById('excelTable');
+    const filtroEmpreiteira = document.getElementById('filtroEmpreiteira');
+    const filtroObra = document.getElementById('filtroObra');
+
+    function atualizarFiltros() {
+      const empreiteiras = [...new Set(dadosTabela.map(d => d.EMPREITEIRA))];
+      const obras = [...new Set(dadosTabela.map(d => d.OBRA))];
+
+      filtroEmpreiteira.innerHTML = '<option value="">Todas as Empreiteiras</option>';
+      filtroObra.innerHTML = '<option value="">Todas as Obras</option>';
+
+      empreiteiras.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e;
+        opt.textContent = e;
+        filtroEmpreiteira.appendChild(opt);
+      });
+
+      obras.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o;
+        opt.textContent = o;
+        filtroObra.appendChild(opt);
+      });
+    }
+
+    function atualizarTabela() {
+      tabela.innerHTML = "";
+
+      if (dadosTabela.length === 0) return;
+
+      const empreiteiraSelecionada = filtroEmpreiteira.value;
+      const obraSelecionada = filtroObra.value;
+
+      const dadosFiltrados = dadosTabela.filter(d => {
+        return (!empreiteiraSelecionada || d.EMPREITEIRA === empreiteiraSelecionada) &&
+               (!obraSelecionada || d.OBRA === obraSelecionada);
+      });
+
+      if (dadosFiltrados.length === 0) {
+        tabela.innerHTML = "<tr><td colspan='6'>Nenhum dado encontrado com esses filtros.</td></tr>";
+        return;
+      }
+
+      const header = document.createElement("tr");
+      Object.keys(dadosFiltrados[0]).forEach(coluna => {
+        const th = document.createElement("th");
+        th.textContent = coluna;
+        header.appendChild(th);
+      });
+      tabela.appendChild(header);
+
+      dadosFiltrados.forEach(linha => {
+        const tr = document.createElement("tr");
+        Object.values(linha).forEach(valor => {
+          const td = document.createElement("td");
+          td.textContent = valor;
+          tr.appendChild(td);
+        });
+        tabela.appendChild(tr);
+      });
+    }
+
+    document.getElementById('inputExcel').addEventListener('change', function (e) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        dadosTabela = XLSX.utils.sheet_to_json(worksheet);
+        atualizarFiltros();
+        atualizarTabela();
+      };
+      reader.readAsArrayBuffer(e.target.files[0]);
+    });
+
+    function adicionarLinha() {
+      const liberacao = document.getElementById('liberacao').value.trim();
+      const data = document.getElementById('data').value.trim();
+      const empreiteira = document.getElementById('empreiteira').value.trim();
+      const obra = document.getElementById('obra').value.trim();
+      const qtde = document.getElementById('qtde').value.trim();
+      const saldo = document.getElementById('saldo').value.trim();
+
+      if (!liberacao || !data || !empreiteira || !obra || !qtde || !saldo) {
+        alert("Preencha todos os campos!");
+        return;
+      }
+
+      dadosTabela.push({
+        "LIBERAÇÃO": liberacao,
+        "DATA": data,
+        "EMPREITEIRA": empreiteira,
+        "OBRA": obra,
+        "QTDE": qtde,
+        "SALDO": saldo
+      });
+
+      atualizarFiltros();
+      atualizarTabela();
+
+      document.getElementById('liberacao').value = "";
+      document.getElementById('data').value = "";
+      document.getElementById('empreiteira').value = "";
+      document.getElementById('obra').value = "";
+      document.getElementById('qtde').value = "";
+      document.getElementById('saldo').value = "";
+    }
+
+    function gerarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const empreiteiraSelecionada = filtroEmpreiteira.value;
+      const obraSelecionada = filtroObra.value;
+
+      const dadosFiltrados = dadosTabela.filter(d => {
+        return (!empreiteiraSelecionada || d.EMPREITEIRA === empreiteiraSelecionada) &&
+               (!obraSelecionada || d.OBRA === obraSelecionada);
+      });
+
+      if (dadosFiltrados.length === 0) {
+        alert("Nenhum dado para exportar.");
+        return;
+      }
+
+      const colunas = Object.keys(dadosFiltrados[0]);
+      const linhas = dadosFiltrados.map(item => colunas.map(col => item[col]));
+
+      doc.text("Relatório de Liberação de Obras", 14, 15);
+      doc.autoTable({
+        startY: 20,
+        head: [colunas],
+        body: linhas,
+        styles: { fontSize: 10 }
+      });
+
+      doc.save("relatorio_liberacao.pdf");
+    }
+  </script>
 </body>
 </html>
