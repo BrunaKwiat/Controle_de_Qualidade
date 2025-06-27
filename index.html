@@ -1,149 +1,157 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Qualidade e Estoque</title>
-    <link rel="stylesheet" href="style.css">
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Qualidade e Estoque</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Sistema de Controle de Qualidade e Estoque</h1>
+  <div class="container">
+    <h1>Sistema de Controle de Qualidade e Estoque</h1>
 
-        <section class="card">
-            <h2>Cadastro de Qualidade</h2>
-            <form id="qualityForm">
-                <div class="form-group">
-                    <label for="liberacao">Liberação:</label>
-                    <input type="text" id="liberacao" required>
-                </div>
-                <div class="form-group">
-                    <label for="data">Data:</label>
-                    <input type="date" id="data" required>
-                </div>
-                <div class="form-group">
-                    <label for="empreiteira">Empreiteira:</label>
-                    <input type="text" id="empreiteira" required>
-                </div>
-                <div class="form-group">
-                    <label for="obra">Obra:</label>
-                    <input type="text" id="obra" required>
-                </div>
-                <div class="form-group">
-                    <label for="qtde">Quantidade:</label>
-                    <input type="number" id="qtde" min="0" required>
-                </div>
-                <div class="form-group">
-                    <label for="saldo">Saldo:</label>
-                    <input type="number" id="saldo" min="0" required>
-                </div>
-                <button type="submit">Adicionar Registro</button>
-            </form>
-        </section>
+    <!-- Cadastro de Qualidade -->
+    <section class="card">
+      <h2>Cadastro de Qualidade</h2>
+      <form id="qualityForm">
+        <div class="form-group">
+          <label for="liberacao">Liberação:</label>
+          <input type="text" id="liberacao" placeholder="Digite a liberação" required />
+        </div>
+        <div class="form-group">
+          <label for="data">Data:</label>
+          <input type="date" id="data" required />
+        </div>
+        <div class="form-group">
+          <label for="empreiteira">Empreiteira:</label>
+          <input type="text" id="empreiteira" placeholder="Nome da empreiteira" required />
+        </div>
+        <div class="form-group">
+          <label for="obra">Obra:</label>
+          <input type="text" id="obra" placeholder="Nome da obra" required />
+        </div>
+        <div class="form-group">
+          <label for="qtde">Quantidade:</label>
+          <input type="number" id="qtde" min="0" required />
+        </div>
+        <div class="form-group">
+          <label for="saldo">Saldo:</label>
+          <input type="number" id="saldo" min="0" required />
+        </div>
+        <button type="submit">Adicionar Registro</button>
+      </form>
+    </section>
 
-        <hr>
+    <hr />
 
-        <section class="card">
-            <h2>Registros de Qualidade</h2>
-            <div class="filter-controls">
-                <div class="form-group">
-                    <label for="filterLiberacao">Filtrar Liberação:</label>
-                    <input type="text" id="filterLiberacao" placeholder="Liberação">
-                </div>
-                <div class="form-group">
-                    <label for="filterData">Filtrar Data:</label>
-                    <input type="date" id="filterData">
-                </div>
-                <div class="form-group">
-                    <label for="filterEmpreiteira">Filtrar Empreiteira:</label>
-                    <input type="text" id="filterEmpreiteira" placeholder="Empreiteira">
-                </div>
-                <div class="form-group">
-                    <label for="filterObra">Filtrar Obra:</label>
-                    <input type="text" id="filterObra" placeholder="Obra">
-                </div>
-                <button id="applyFilters">Aplicar Filtros</button>
-                <button id="clearFilters">Limpar Filtros</button>
-            </div>
+    <!-- Filtros e Tabela de Qualidade -->
+    <section class="card">
+      <h2>Registros de Qualidade</h2>
 
-            <div class="action-buttons">
-                <input type="file" id="excelFileInput" accept=".xlsx, .xls">
-                <button id="importExcel">Importar Excel</button>
-                <button id="generatePdf">Gerar PDF</button>
-            </div>
+      <!-- Filtros -->
+      <div class="filter-controls">
+        <div class="form-group">
+          <label for="filterLiberacao">Filtrar Liberação:</label>
+          <input type="text" id="filterLiberacao" placeholder="Liberação" />
+        </div>
+        <div class="form-group">
+          <label for="filterData">Filtrar Data:</label>
+          <input type="date" id="filterData" />
+        </div>
+        <div class="form-group">
+          <label for="filterEmpreiteira">Filtrar Empreiteira:</label>
+          <input type="text" id="filterEmpreiteira" placeholder="Empreiteira" />
+        </div>
+        <div class="form-group">
+          <label for="filterObra">Filtrar Obra:</label>
+          <input type="text" id="filterObra" placeholder="Obra" />
+        </div>
+        <div class="form-actions">
+          <button type="button" id="applyFilters">Aplicar Filtros</button>
+          <button type="button" id="clearFilters">Limpar Filtros</button>
+        </div>
+      </div>
 
-            <div class="table-responsive">
-                <table id="qualityTable">
-                    <thead>
-                        <tr>
-                            <th>Liberação</th>
-                            <th>Data</th>
-                            <th>Empreiteira</th>
-                            <th>Obra</th>
-                            <th>Qtde</th>
-                            <th>Saldo</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        </tbody>
-                </table>
-            </div>
-        </section>
+      <!-- Importação e Exportação -->
+      <div class="action-buttons">
+        <input type="file" id="excelFileInput" accept=".xlsx, .xls" />
+        <button type="button" id="importExcel">Importar Excel</button>
+        <button type="button" id="generatePdf">Gerar PDF</button>
+      </div>
 
-        <hr>
+      <!-- Tabela de Qualidade -->
+      <div class="table-responsive">
+        <table id="qualityTable">
+          <thead>
+            <tr>
+              <th>Liberação</th>
+              <th>Data</th>
+              <th>Empreiteira</th>
+              <th>Obra</th>
+              <th>Qtde</th>
+              <th>Saldo</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
 
-        <section class="card">
-            <h2>Controle de Estoque</h2>
-            <div class="form-group">
-                <label for="estoqueAtual">Estoque Atual:</label>
-                <input type="number" id="estoqueAtual" value="100" readonly>
-            </div>
+    <hr />
 
-            <h3>Cadastro de Cliente e Alteração de Estoque</h3>
-            <form id="clienteForm">
-                <div class="form-group">
-                    <label for="clienteNome">Nome do Cliente:</label>
-                    <input type="text" id="clienteNome" required>
-                </div>
-                <div class="form-group">
-                    <label for="itemComprado">Item Comprado:</label>
-                    <input type="text" id="itemComprado" required>
-                </div>
-                <div class="form-group">
-                    <label for="qtdeComprada">Quantidade Comprada:</label>
-                    <input type="number" id="qtdeComprada" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label for="tipoAlteracaoEstoque">Tipo de Alteração:</label>
-                    <select id="tipoAlteracaoEstoque">
-                        <option value="saida">Saída (Venda)</option>
-                        <option value="entrada">Entrada (Devolução/Reposição)</option>
-                    </select>
-                </div>
-                <button type="submit">Registrar Cliente e Atualizar Estoque</button>
-            </form>
+    <!-- Controle de Estoque -->
+    <section class="card">
+      <h2>Controle de Estoque</h2>
 
-            <div class="table-responsive">
-                <table id="clienteTable">
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Item Comprado</th>
-                            <th>Qtde Comprada</th>
-                            <th>Tipo Alteração</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        </tbody>
-                </table>
-            </div>
-        </section>
-    </div>
+      <div class="form-group">
+        <label for="estoqueAtual">Estoque Atual:</label>
+        <input type="number" id="estoqueAtual" value="100" readonly />
+      </div>
 
-    <script src="script.js"></script>
+      <h3>Cadastro de Cliente e Alteração de Estoque</h3>
+      <form id="clienteForm">
+        <div class="form-group">
+          <label for="clienteNome">Nome do Cliente:</label>
+          <input type="text" id="clienteNome" required />
+        </div>
+        <div class="form-group">
+          <label for="itemComprado">Item Comprado:</label>
+          <input type="text" id="itemComprado" required />
+        </div>
+        <div class="form-group">
+          <label for="qtdeComprada">Quantidade Comprada:</label>
+          <input type="number" id="qtdeComprada" min="1" required />
+        </div>
+        <div class="form-group">
+          <label for="tipoAlteracaoEstoque">Tipo de Alteração:</label>
+          <select id="tipoAlteracaoEstoque" required>
+            <option value="saida">Saída (Venda)</option>
+            <option value="entrada">Entrada (Devolução/Reposição)</option>
+          </select>
+        </div>
+        <button type="submit">Registrar Cliente e Atualizar Estoque</button>
+      </form>
+
+      <!-- Tabela de Clientes -->
+      <div class="table-responsive">
+        <table id="clienteTable">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Item Comprado</th>
+              <th>Qtde Comprada</th>
+              <th>Tipo Alteração</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
