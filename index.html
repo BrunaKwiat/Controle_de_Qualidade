@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importar Dados de Planilha</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Importar Dados de Planilha</h1>
+
+        <div class="upload-section">
+            <label for="excelFile">Selecione o arquivo CSV:</label>
+            <input type="file" id="excelFile" accept=".csv">
+            <button id="importButton">Importar Dados</button>
+        </div>
+
+        <div class="table-section">
+            <h2>Dados Importados</h2>
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Liberação</th>
+                            <th>DARA</th>
+                            <th>Empreiteira</th>
+                            <th>Obra</th>
+                            <th>Quantidade</th>
+                            <th>Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+            <p id="message" class="message"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
