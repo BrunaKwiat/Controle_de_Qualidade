@@ -20,9 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const generatePdfBtn = document.getElementById('generatePdf');
 
     let qualityRecords = JSON.parse(localStorage.getItem('qualityRecords')) || [];
-    let currentFilteredRecords = [...qualityRecords]; // Cópia para aplicar filtros
+    // Removi a inicialização de currentFilteredRecords aqui, ela será definida por renderQualityRecords
     let estoqueAtual = parseInt(localStorage.getItem('estoqueAtual')) || 100; // Estoque inicial
     let clienteRecords = JSON.parse(localStorage.getItem('clienteRecords')) || [];
+
+    // Esta variável armazenará os registros que estão atualmente sendo exibidos/filtrados na tabela.
+    // Ela será a fonte para a exportação de PDF.
+    let currentDisplayedRecords = [];
 
     estoqueAtualInput.value = estoqueAtual;
 
@@ -39,6 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderQualityRecords(recordsToDisplay = qualityRecords) {
         qualityTableBody.innerHTML = ''; // Limpa a tabela
 
+        // Atualiza a variável global com os registros que estão sendo renderizados
+        currentDisplayedRecords = [...recordsToDisplay]; // Cria uma cópia para evitar referência direta
+
         if (recordsToDisplay.length === 0) {
             const noDataRow = qualityTableBody.insertRow();
             const cell = noDataRow.insertCell(0);
@@ -51,6 +58,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         recordsToDisplay.forEach((record, index) => {
             const row = qualityTableBody.insertRow();
+            // Para editar/excluir, precisamos do índice no array original 'qualityRecords'
+            // O ideal é usar um identificador único (ID) se houver, mas para este exemplo,
+            // vamos encontrar o índice original.
+            const originalIndex = qualityRecords.findIndex(r =>
+                r.liberacao === record.liberacao &&
+                r.data === record.data &&
+                r.empreiteira === record.empreiteira &&
+                r.obra === record.obra &&
+                r.qtde === record.qtde &&
+                r.saldo === record.saldo
+            );
+
             row.insertCell().textContent = record.liberacao;
             row.insertCell().textContent = record.data;
             row.insertCell().textContent = record.empreiteira;
@@ -62,16 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const editButton = document.createElement('button');
             editButton.textContent = 'Editar';
             editButton.classList.add('edit-btn');
-            editButton.onclick = () => editQualityRecord(index, record);
+            editButton.onclick = () => editQualityRecord(originalIndex); // Passa o índice original
             actionsCell.appendChild(editButton);
 
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Excluir';
             deleteButton.classList.add('delete-btn');
-            deleteButton.onclick = () => deleteQualityRecord(index);
+            deleteButton.onclick = () => deleteQualityRecord(originalIndex); // Passa o índice original
             actionsCell.appendChild(deleteButton);
         });
-        currentFilteredRecords = recordsToDisplay; // Atualiza os registros filtrados
     }
 
     // Renderiza os registros de cliente na tabela
@@ -102,9 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const editingIndex = qualityForm.dataset.editingIndex;
-        if (editingIndex !== undefined) {
-            // Se estiver editando, atualiza o registro existente
-            qualityRecords[editingIndex] = newRecord;
+        if (editingIndex !== undefined && editingIndex !== "") { // Verifica se o índice existe e não é vazio
+            // Se estiver editando, atualiza o registro existente no array original
+            qualityRecords[parseInt(editingIndex)] = newRecord;
             delete qualityForm.dataset.editingIndex; // Remove o índice de edição
             qualityForm.querySelector('button[type="submit"]').textContent = 'Adicionar Registro'; // Volta ao texto original
         } else {
@@ -113,22 +131,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         saveRecords();
-        applyFilters(); // Re-aplica os filtros após adicionar/editar
+        applyFilters(); // Re-aplica os filtros para garantir que a tabela e currentDisplayedRecords estejam atualizados
         qualityForm.reset();
     });
 
     // Edita um registro de qualidade
-    function editQualityRecord(index, record) {
-        // Preenche o formulário com os dados do registro selecionado
-        document.getElementById('liberacao').value = record.liberacao;
-        document.getElementById('data').value = record.data;
-        document.getElementById('empreiteira').value = record.empreiteira;
-        document.getElementById('obra').value = record.obra;
-        document.getElementById('qtde').value = record.qtde;
-        document.getElementById('saldo').value = record.saldo;
+    function editQualityRecord(index) {
+        // Preenche o formulário com os dados do registro selecionado do array original
+        const recordToEdit = qualityRecords[index];
+        if (!recordToEdit) return; // Garante que o registro existe
+
+        document.getElementById('liberacao').value = recordToEdit.liberacao;
+        document.getElementById('data').value = recordToEdit.data;
+        document.getElementById('empreiteira').value = recordToEdit.empreiteira;
+        document.getElementById('obra').value = recordToEdit.obra;
+        document.getElementById('qtde').value = recordToEdit.qtde;
+        document.getElementById('saldo').value = recordToEdit.saldo;
 
         // Armazena o índice do registro que está sendo editado no dataset do formulário
-        qualityForm.dataset.editingIndex = index;
+        qualityForm.dataset.editingIndex = index.toString(); // Salva como string
         // Muda o texto do botão para indicar que está em modo de edição
         qualityForm.querySelector('button[type="submit"]').textContent = 'Atualizar Registro';
     }
@@ -139,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Remove o registro do array original
             qualityRecords.splice(index, 1);
             saveRecords();
-            applyFilters(); // Re-aplica os filtros para atualizar a tabela
+            applyFilters(); // Re-aplica os filtros para atualizar a tabela e currentDisplayedRecords
         }
     }
 
@@ -159,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const matchObra = obra ? record.obra.toLowerCase().includes(obra) : true;
             return matchLiberacao && matchData && matchEmpreiteira && matchObra;
         });
-        renderQualityRecords(filtered);
+        renderQualityRecords(filtered); // Renderiza os registros filtrados e atualiza currentDisplayedRecords
     }
 
     // Limpa os filtros
@@ -168,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         filterData.value = '';
         filterEmpreiteira.value = '';
         filterObra.value = '';
-        renderQualityRecords(); // Exibe todos os registros novamente
+        renderQualityRecords(); // Exibe todos os registros novamente e atualiza currentDisplayedRecords
     });
 
     // Event listeners para os filtros
@@ -195,24 +216,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const worksheet = workbook.Sheets[firstSheetName];
             const json = XLSX.utils.sheet_to_json(worksheet);
 
-            // Assumimos que as colunas do Excel têm os mesmos nomes dos campos do formulário
-            // Se os nomes forem diferentes, você precisará mapeá-los aqui.
             const newRecords = json.map(row => ({
-                liberacao: row.LIBERACAO || '', // Use os nomes das colunas do seu Excel
-                data: row.DATA ? new Date(row.DATA).toISOString().split('T')[0] : '', // Converte data se necessário
-                empreiteira: row.EMPREITEIRA || '',
-                obra: row.OBRA || '',
-                qtde: parseInt(row.QTDE) || 0,
-                saldo: parseInt(row.SALDO) || 0
+                // Adicionei mais flexibilidade para os nomes das colunas (maiúsculas/minúsculas)
+                liberacao: row.LIBERACAO || row.liberacao || '',
+                data: row.DATA ? (typeof row.DATA === 'number' ? excelDateToISODate(row.DATA) : row.DATA) : '',
+                empreiteira: row.EMPREITEIRA || row.empreiteira || '',
+                obra: row.OBRA || row.obra || '',
+                qtde: parseInt(row.QTDE || row.qtde) || 0,
+                saldo: parseInt(row.SALDO || row.saldo) || 0
             }));
 
             qualityRecords = [...qualityRecords, ...newRecords]; // Adiciona os novos registros
             saveRecords();
-            renderQualityRecords();
+            applyFilters(); // Aplica os filtros novamente para renderizar os novos dados
             alert('Dados importados com sucesso!');
         };
         reader.readAsArrayBuffer(file);
     });
+
+    // Função auxiliar para converter data do Excel (número serial) para formato ISO
+    function excelDateToISODate(excelDate) {
+        if (typeof excelDate === 'number') {
+            // Excel data starts from Jan 1, 1900. Unix epoch starts from Jan 1, 1970.
+            // 25569 is the number of days between 1900-01-01 and 1970-01-01
+            // Adding 1 because Excel considers 1900 a leap year, which it isn't.
+            const date = new Date((excelDate - (25567 + 1)) * 86400 * 1000);
+            return date.toISOString().split('T')[0];
+        }
+        return excelDate; // Retorna como está se não for número
+    }
 
     // --- Geração de PDF ---
     generatePdfBtn.addEventListener('click', () => {
@@ -222,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'pt', 'a4'); // 'p' para retrato, 'pt' para pontos, 'a4' para tamanho da página
+        const doc = new jsPDF('p', 'pt', 'a4');
 
         doc.setFontSize(18);
         doc.text("Relatório de Controle de Qualidade", doc.internal.pageSize.getWidth() / 2, 40, { align: 'center' });
@@ -230,8 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableColumn = ["Liberação", "Data", "Empreiteira", "Obra", "Qtde", "Saldo"];
         const tableRows = [];
 
-        // Usa os registros atualmente filtrados para gerar o PDF
-        currentFilteredRecords.forEach(record => {
+        // ***** PONTO CHAVE: Usar 'currentDisplayedRecords' para gerar o PDF *****
+        currentDisplayedRecords.forEach(record => {
             const recordData = [
                 record.liberacao,
                 record.data,
@@ -242,6 +274,11 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
             tableRows.push(recordData);
         });
+
+        if (tableRows.length === 0) {
+            alert('Não há dados para gerar o relatório PDF.');
+            return;
+        }
 
         doc.autoTable({
             head: [tableColumn],
@@ -298,14 +335,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Inicialização ---
-    renderQualityRecords(); // Carrega os registros de qualidade ao iniciar
+    applyFilters(); // Chamada inicial para renderizar todos os registros e popular currentDisplayedRecords
     renderClienteRecords(); // Carrega os registros de cliente ao iniciar
 
-    // Importar jsPDF AutoTable plugin
-    // Certifique-se de que o plugin está disponível, geralmente vem com a instalação completa
-    // Se estiver usando o CDN, pode ser necessário incluí-lo separadamente ou usar uma versão que já o contenha.
-    // Para fins de demonstração, confio que o CDN do jsPDF inclua autoTable.
-    if (typeof doc === 'undefined' && typeof window.jspdf.jsPDF !== 'undefined') {
-        window.jspdf.jsPDF.API.autoTable = window.jspdf.autoTable;
+    // Importar jsPDF AutoTable plugin (esta linha pode ser removida se o CDN já incluir)
+    if (typeof window.jspdf.jsPDF !== 'undefined' && typeof window.jspdf.autoTable === 'undefined') {
+        // Isso é uma tentativa de garantir que autoTable esteja disponível se não vier no bundle principal.
+        // Em muitos casos de CDN, ele já vem junto.
+        // Se ainda der erro, você pode precisar de um CDN específico para jsPDF AutoTable.
+        // window.jspdf.jsPDF.API.autoTable = window.jspdf.autoTable; // Isso só funciona se autoTable já for global
     }
 });
