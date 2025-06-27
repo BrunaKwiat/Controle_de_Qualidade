@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Verifica se o arquivo é um CSV
-        if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-            displayMessage('Por favor, selecione um arquivo CSV válido.', 'error');
+        if (file.type !== 'text/xlsx' && !file.name.endsWith('.xlsx')) {
+            displayMessage('Por favor, selecione um arquivo xlsx válido.', 'error');
             return;
         }
 
@@ -32,9 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsText(file);
     });
 
-    function processCSV(csvText) {
+    function processCSV(xlsxText) {
         // Divide o texto CSV em linhas
-        const lines = csvText.split('\n').filter(line => line.trim() !== '');
+        const lines = xlsxText.split('\n').filter(line => line.trim() !== '');
 
         if (lines.length === 0) {
             displayMessage('O arquivo CSV está vazio.', 'error');
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Garante que os dados sejam exibidos corretamente
                 const liberacao = columns[0].trim();
-                const dara = columns[1].trim();
+                const data = columns[1].trim();
                 const empreiteira = columns[2].trim();
                 const obra = columns[3].trim();
                 const quantidade = columns[4].trim();
