@@ -8,82 +8,141 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = excelFileInput.files[0];
 
         if (!file) {
-            displayMessage('Por favor, selecione um arquivo CSV.', 'error');
+            displayMessage('Por favor, selecione um arquivo Excel (.xlsx ou .xls).', 'error');
             return;
         }
 
-        // Verifica se o arquivo é um CSV
-        if (file.type !== 'text/xlsx' && !file.name.endsWith('.xlsx')) {
-            displayMessage('Por favor, selecione um arquivo xlsx válido.', 'error');
+        // Verifica se o arquivo é um XLSX ou XLS
+        const allowedTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+            'application/vnd.ms-excel' // .xls
+        ];
+        if (!allowedTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/i)) {
+            displayMessage('Por favor, selecione um arquivo Excel válido (.xlsx ou .xls).', 'error');
             return;
         }
 
         const reader = new FileReader();
 
         reader.onload = function(e) {
-            const text = e.target.result;
-            processCSV(text);
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Pega a primeira aba da planilha
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            // Converte a planilha para um array de objetos JSON
+            // { header: 1 } para usar a primeira linha como cabeçalho (opcional, pode remover se não tiver cabeçalho)
+            // raw: false para formatar células (datas, números) automaticamente
+            const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
+
+            processExcelData(json);
         };
 
         reader.onerror = function() {
             displayMessage('Erro ao ler o arquivo.', 'error');
         };
 
-        reader.readAsText(file);
+        reader.readAsArrayBuffer(file);
     });
 
-    function processCSV(xlsxText) {
-        // Divide o texto CSV em linhas
-        const lines = xlsxText.split('\n').filter(line => line.trim() !== '');
-
-        if (lines.length === 0) {
-            displayMessage('O arquivo CSV está vazio.', 'error');
-            return;
-        }
-
+    function processExcelData(data) {
         // Limpa a tabela antes de adicionar novos dados
         dataTableBody.innerHTML = '';
 
-        // Pula a primeira linha se for um cabeçalho (opcional, dependendo do seu CSV)
-        // const headers = lines[0].split(';'); // Ou ',' se o delimitador for vírgula
-        // const dataLines = lines.slice(1);
+        if (data.length === 0) {
+            displayMessage('A planilha Excel está vazia ou não contém dados válidos.', 'error');
+            return;
+        }
 
-        // Para este exemplo, vamos assumir que não há cabeçalho ou que queremos todas as linhas
-        // Se você tiver um cabeçalho e quiser pular, use: const dataLines = lines.slice(1);
-        const dataLines = lines; // Se todas as linhas são dados
+        // Assumimos que a primeira linha contém os cabeçalhos.
+        // Se seus dados começam na primeira linha e não há cabeçalhos,
+        // remova a linha abaixo e ajuste o índice das colunas.
+        const headers = data[0]; // Primeira linha é o cabeçalho
+        const actualData = data.slice(1); // O resto são os dados
 
-        dataLines.forEach(line => {
-            // Ajuste o delimitador aqui (',' para CSV comum, ';' para CSV de Excel português)
-            const columns = line.split(';'); // Ou line.split(',')
+        // Mapeia os cabeçalhos para os índices das colunas esperadas
+        const colMap = {
+            'Liberação': -1,
+            'Data': -1,
+            'Empreiteira': -1,
+            'Obra': -1,
+            'Quantidade': -1,
+            'Saldo': -1
+        };
 
-            // Verifica se há colunas suficientes
-            if (columns.length >= 6) {
+        headers.forEach((header, index) => {
+            const normalizedHeader = header ? header.trim() : '';
+            switch (normalizedHeader) {
+                case 'Liberação':
+                    colMap['Liberação'] = index;
+                    break;
+                case 'Data':
+                    colMap['Data'] = index;
+                    break;
+                case 'Empreiteira':
+                    colMap['Empreiteira'] = index;
+                    break;
+                case 'Obpre': // Pode ser "Obra" ou "Obp" no Excel
+                case 'Obra': // Adicione variações que seu Excel possa ter
+                    colMap['Obra'] = index;
+                    break;
+                case 'Quantidade':
+                    colMap['Quantidade'] = index;
+                    break;
+                case 'Saldo':
+                    colMap['Saldo'] = index;
+                    break;
+                default:
+                    // Ignora cabeçalhos não reconhecidos
+                    break;
+            }
+        });
+
+        let dataFound = false;
+        actualData.forEach(rowArray => {
+            // Garante que a linha tenha pelo menos o número de colunas que esperamos,
+            // mesmo que algumas estejam vazias no final
+            if (rowArray.length >= Math.max(...Object.values(colMap)) + 1) {
                 const row = dataTableBody.insertRow();
 
-                // Garante que os dados sejam exibidos corretamente
-                const liberacao = columns[0].trim();
-                const data = columns[1].trim();
-                const empreiteira = columns[2].trim();
-                const obra = columns[3].trim();
-                const quantidade = columns[4].trim();
-                const saldo = columns[5].trim();
+                const liberacao = rowArray[colMap['Liberação']] !== undefined ? String(rowArray[colMap['Liberação']]).trim() : '';
+                const dataValue = rowArray[colMap['Data']] !== undefined ? formatExcelDate(rowArray[colMap['Data']]) : '';
+                const empreiteira = rowArray[colMap['Empreiteira']] !== undefined ? String(rowArray[colMap['Empreiteira']]).trim() : '';
+                const obra = rowArray[colMap['Obra']] !== undefined ? String(rowArray[colMap['Obra']]).trim() : '';
+                const quantidade = rowArray[colMap['Quantidade']] !== undefined ? String(rowArray[colMap['Quantidade']]).trim() : '';
+                const saldo = rowArray[colMap['Saldo']] !== undefined ? String(rowArray[colMap['Saldo']]).trim() : '';
 
                 row.insertCell().textContent = liberacao;
-                row.insertCell().textContent = dara;
+                row.insertCell().textContent = dataValue;
                 row.insertCell().textContent = empreiteira;
                 row.insertCell().textContent = obra;
                 row.insertCell().textContent = quantidade;
                 row.insertCell().textContent = saldo;
+                dataFound = true;
             } else {
-                console.warn('Linha ignorada por ter menos de 6 colunas:', line);
+                console.warn('Linha ignorada por não ter colunas suficientes ou ser inválida:', rowArray);
             }
         });
 
-        if (dataTableBody.rows.length > 0) {
+        if (dataFound) {
             displayMessage('Dados importados com sucesso!', 'success');
         } else {
-            displayMessage('Nenhum dado válido encontrado no arquivo CSV.', 'error');
+            displayMessage('Nenhum dado válido encontrado na planilha com os cabeçalhos esperados.', 'error');
         }
+    }
+
+    // Função para formatar datas do Excel (que podem vir como números)
+    function formatExcelDate(excelDate) {
+        if (typeof excelDate === 'number') {
+            // O Excel armazena datas como números de dias desde 1900-01-01 (ou 1904 para Mac)
+            // Convertendo para data JavaScript
+            const date = XLSX.SSF.parse_date_code(excelDate);
+            const jsDate = new Date(date.y, date.m - 1, date.d); // Mês é 0-indexado
+            return jsDate.toLocaleDateString('pt-BR'); // Formata para o padrão brasileiro
+        }
+        return excelDate; // Retorna como está se não for um número
     }
 
     function displayMessage(message, type) {
