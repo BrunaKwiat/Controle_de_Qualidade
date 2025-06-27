@@ -3,20 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leitor e Controle de Planilha Excel</title>
+    <title>Controle de Liberação - Excel e Formulário</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
-        <h2>Controle de Informações - Excel</h2>
-        <p>Selecione um arquivo Excel (.xlsx, .xls) para visualizar os dados na tabela.</p>
-        <input type="file" id="inputExcel" accept=".xlsx, .xls" />
+        <h2>Controle de Liberação de Materiais</h2>
         
-        <div class="table-container">
-            <table id="excelTable">
+        <div class="form-section">
+            <h3>Entrada Manual de Dados</h3>
+            <form id="materialForm">
+                <div class="form-group">
+                    <label for="liberacao">LIBERAÇÃO:</label>
+                    <input type="text" id="liberacao" name="liberacao" required>
+                </div>
+                <div class="form-group">
+                    <label for="data">DATA:</label>
+                    <input type="date" id="data" name="data" required>
+                </div>
+                <div class="form-group">
+                    <label for="empreiteira">EMPREITEIRA:</label>
+                    <input type="text" id="empreiteira" name="empreiteira" required>
+                </div>
+                <div class="form-group">
+                    <label for="obra">OBRA:</label>
+                    <input type="text" id="obra" name="obra" required>
+                </div>
+                <div class="form-group">
+                    <label for="qtde">QTDE:</label>
+                    <input type="number" id="qtde" name="qtde" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="saldo">SALDO:</label>
+                    <input type="number" id="saldo" name="saldo" min="0" required>
+                </div>
+                <button type="submit">Adicionar à Tabela</button>
+            </form>
+        </div>
+
+        <div class="excel-import-section">
+            <h3>Importar Dados do Excel</h3>
+            <p>Selecione um arquivo Excel (.xlsx, .xls) para importar os dados para a tabela.</p>
+            <input type="file" id="inputExcel" accept=".xlsx, .xls" />
+        </div>
+        
+        <div class="table-section">
+            <h3>Dados Importados / Adicionados</h3>
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>LIBERAÇÃO</th>
+                            <th>DATA</th>
+                            <th>EMPREITEIRA</th>
+                            <th>OBRA</th>
+                            <th>QTDE</th>
+                            <th>SALDO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
                 </table>
+            </div>
+            <p id="emptyTableMessage" style="text-align: center; color: #777; margin-top: 15px;">Nenhum dado na tabela ainda. Adicione manualmente ou importe do Excel.</p>
         </div>
     </div>
 
