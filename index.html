@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Importar Dados de Planilha</title>
+    <title>Importar Dados de Planilha XLSX</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Importar Dados de Planilha</h1>
+        <h1>Importar Dados de Planilha Excel (.xlsx)</h1>
 
         <div class="upload-section">
-            <label for="excelFile">Selecione o arquivo CSV:</label>
-            <input type="file" id="excelFile" accept=".csv">
+            <label for="excelFile">Selecione o arquivo XLSX:</label>
+            <input type="file" id="excelFile" accept=".xlsx, .xls">
             <button id="importButton">Importar Dados</button>
         </div>
 
