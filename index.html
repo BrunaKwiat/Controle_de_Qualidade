@@ -2,41 +2,18 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Cadastro de Liberação</title>
+  <title>Excel para Formulário</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>Cadastro de Liberação</h1>
-    <form id="formulario">
-      <label>Liberação: <input type="text" id="liberacao" required></label>
-      <label>Data: <input type="date" id="data" required></label>
-      <label>Empreiteira: <input type="text" id="empreiteira" required></label>
-      <label>Obra: <input type="text" id="obra" required></label>
-      <label>Quantidade: <input type="number" id="qtde" required></label>
-      <label>Saldo: <input type="number" id="saldo" required></label>
-      <input type="file" id="excelFile" accept=".xlsx" />
-      <button onclick="importarExcel()">Importar Excel</button>
-      <button type="submit">Salvar</button>
-    </form>
+    <h1>Importar Excel e Gerar Formulários</h1>
 
-    <h2>Registros</h2>
-    <table id="tabela">
-      <thead>
-        <tr>
-          <th>Liberação</th>
-          <th>Data</th>
-          <th>Empreiteira</th>
-          <th>Obra</th>
-          <th>Qtde</th>
-          <th>Saldo</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <input type="file" id="excelFile" accept=".xlsx" />
+    <div id="formContainer"></div>
   </div>
 
-   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
