@@ -1,35 +1,43 @@
-document.getElementById('excelFile').addEventListener('change', function (e) {
-  const file = e.target.files[0];
-  const reader = new FileReader();
+document.addEventListener('DOMContentLoaded', () => {
+    const qualityForm = document.getElementById('qualityForm');
+    const qualityTableBody = document.querySelector('#qualityTable tbody');
 
-  reader.onload = function (event) {
-    const data = new Uint8Array(event.target.result);
-    const workbook = XLSX.read(data, { type: 'array' });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet);
+    let qualityRecords = JSON.parse(localStorage.getItem('qualityRecords')) || [];
 
-    const container = document.getElementById('formContainer');
-    container.innerHTML = ''; // limpa
+    // Função para renderizar os registros na tabela
+    function renderRecords() {
+        qualityTableBody.innerHTML = ''; // Limpa a tabela antes de renderizar
+        qualityRecords.forEach(record => {
+            const row = qualityTableBody.insertRow();
+            row.insertCell().textContent = record.liberacao;
+            row.insertCell().textContent = record.data;
+            row.insertCell().textContent = record.empreiteira;
+            row.insertCell().textContent = record.obra;
+            row.insertCell().textContent = record.qtde;
+            row.insertCell().textContent = record.saldo;
+        });
+    }
 
-    rows.forEach((row, index) => {
-      const form = document.createElement('form');
+    // Lidar com o envio do formulário
+    qualityForm.addEventListener('submit', (event) => {
+        event.preventDefault(); // Impede o recarregamento da página
 
-      for (const key in row) {
-        const label = document.createElement('label');
-        label.textContent = key;
+        const newRecord = {
+            liberacao: document.getElementById('liberacao').value,
+            data: document.getElementById('data').value,
+            empreiteira: document.getElementById('empreiteira').value,
+            obra: document.getElementById('obra').value,
+            qtde: parseInt(document.getElementById('qtde').value),
+            saldo: parseInt(document.getElementById('saldo').value)
+        };
 
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.name = key;
-        input.value = row[key];
+        qualityRecords.push(newRecord);
+        localStorage.setItem('qualityRecords', JSON.stringify(qualityRecords)); // Salva no localStorage
 
-        form.appendChild(label);
-        form.appendChild(input);
-      }
-
-      container.appendChild(form);
+        renderRecords(); // Atualiza a tabela
+        qualityForm.reset(); // Limpa o formulário
     });
-  };
 
-  reader.readAsArrayBuffer(file);
+    // Renderiza os registros existentes ao carregar a página
+    renderRecords();
 });
