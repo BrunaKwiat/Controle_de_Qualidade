@@ -1,153 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de Qualidade e Estoque</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
-  <script src="script.js" defer></script>
+  <meta charset="UTF-8">
+  <title>Cadastro de Liberação</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Sistema de Controle de Qualidade e Estoque</h1>
+    <h1>Cadastro de Liberação</h1>
+    <form id="formulario">
+      <label>Liberação: <input type="text" id="liberacao" required></label>
+      <label>Data: <input type="date" id="data" required></label>
+      <label>Empreiteira: <input type="text" id="empreiteira" required></label>
+      <label>Obra: <input type="text" id="obra" required></label>
+      <label>Quantidade: <input type="number" id="qtde" required></label>
+      <label>Saldo: <input type="number" id="saldo" required></label>
+      <button type="submit">Salvar</button>
+    </form>
 
-    <!-- Cadastro de Qualidade -->
-    <section class="card">
-      <h2>Cadastro de Qualidade</h2>
-      <form id="qualityForm">
-        <!-- Campos do formulário -->
-        <div class="form-group">
-          <label for="liberacao">Liberação:</label>
-          <input type="text" id="liberacao" required />
-        </div>
-        <div class="form-group">
-          <label for="data">Data:</label>
-          <input type="date" id="data" required />
-        </div>
-        <div class="form-group">
-          <label for="empreiteira">Empreiteira:</label>
-          <input type="text" id="empreiteira" required />
-        </div>
-        <div class="form-group">
-          <label for="obra">Obra:</label>
-          <input type="text" id="obra" required />
-        </div>
-        <div class="form-group">
-          <label for="qtde">Quantidade:</label>
-          <input type="number" id="qtde" min="0" required />
-        </div>
-        <div class="form-group">
-          <label for="saldo">Saldo:</label>
-          <input type="number" id="saldo" min="0" required />
-        </div>
-        <button type="submit">Adicionar Registro</button>
-      </form>
-    </section>
-
-    <!-- Filtros e tabela -->
-    <section class="card">
-      <h2>Registros de Qualidade</h2>
-
-      <!-- Filtros -->
-      <div class="filter-controls">
-        <div class="form-group">
-          <label for="filterLiberacao">Filtrar Liberação:</label>
-          <input type="text" id="filterLiberacao" />
-        </div>
-        <div class="form-group">
-          <label for="filterData">Filtrar Data:</label>
-          <input type="date" id="filterData" />
-        </div>
-        <div class="form-group">
-          <label for="filterEmpreiteira">Filtrar Empreiteira:</label>
-          <input type="text" id="filterEmpreiteira" />
-        </div>
-        <div class="form-group">
-          <label for="filterObra">Filtrar Obra:</label>
-          <input type="text" id="filterObra" />
-        </div>
-        <div class="form-actions">
-          <button type="button" id="applyFilters">Aplicar Filtros</button>
-          <button type="button" id="clearFilters">Limpar Filtros</button>
-        </div>
-      </div>
-
-      <!-- Importar e Exportar -->
-      <div class="action-buttons">
-        <input type="file" id="excelFileInput" accept=".xlsx, .xls" />
-        <button type="button" id="importExcel">Importar Excel</button>
-        <button type="button" id="generatePdf">Gerar PDF</button>
-      </div>
-
-      <!-- Tabela -->
-      <div class="table-responsive">
-        <table id="qualityTable">
-          <thead>
-            <tr>
-              <th>Liberação</th>
-              <th>Data</th>
-              <th>Empreiteira</th>
-              <th>Obra</th>
-              <th>Qtde</th>
-              <th>Saldo</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Controle de Estoque -->
-    <section class="card">
-      <h2>Controle de Estoque</h2>
-
-      <div class="form-group">
-        <label for="estoqueAtual">Estoque Atual:</label>
-        <input type="number" id="estoqueAtual" value="100" readonly />
-      </div>
-
-      <h3>Cadastro de Cliente e Atualização de Estoque</h3>
-      <form id="clienteForm">
-        <div class="form-group">
-          <label for="clienteNome">Nome do Cliente:</label>
-          <input type="text" id="clienteNome" required />
-        </div>
-        <div class="form-group">
-          <label for="itemComprado">Item Comprado:</label>
-          <input type="text" id="itemComprado" required />
-        </div>
-        <div class="form-group">
-          <label for="qtdeComprada">Quantidade Comprada:</label>
-          <input type="number" id="qtdeComprada" min="1" required />
-        </div>
-        <div class="form-group">
-          <label for="tipoAlteracaoEstoque">Tipo de Alteração:</label>
-          <select id="tipoAlteracaoEstoque" required>
-            <option value="saida">Saída (Venda)</option>
-            <option value="entrada">Entrada (Devolução/Reposição)</option>
-          </select>
-        </div>
-        <button type="submit">Registrar Cliente e Atualizar Estoque</button>
-      </form>
-
-      <!-- Tabela Clientes -->
-      <div class="table-responsive">
-        <table id="clienteTable">
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Item Comprado</th>
-              <th>Qtde Comprada</th>
-              <th>Tipo Alteração</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+    <h2>Registros</h2>
+    <table id="tabela">
+      <thead>
+        <tr>
+          <th>Liberação</th>
+          <th>Data</th>
+          <th>Empreiteira</th>
+          <th>Obra</th>
+          <th>Qtde</th>
+          <th>Saldo</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
