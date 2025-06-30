@@ -1,28 +1,39 @@
-document.getElementById('formulario').addEventListener('submit', function(event) {
-  event.preventDefault();
+// Normaliza cabeçalhos: remove acentos, espaços, e converte para maiúsculas
+function normalizarCabecalho(texto) {
+  return texto
+    .normalize("NFD")                      // separa letras de acentos
+    .replace(/[\u0300-\u036f]/g, "")      // remove os acentos
+    .replace(/[^a-zA-Z0-9]/g, "")         // remove caracteres especiais e espaços
+    .toUpperCase();                       // para maiúsculo
+}
 
-  const liberacao = document.getElementById('liberacao').value;
-  const data = document.getElementById('data').value;
-  const empreiteira = document.getElementById('empreiteira').value;
-  const obra = document.getElementById('obra').value;
-  const qtde = document.getElementById('qtde').value;
-  const saldo = document.getElementById('saldo').value;
+// Mapeia colunas flexíveis para os campos esperados
+function mapearCampos(obj) {
+  const camposEsperados = {
+    LIBERACAO: ["LIBERACAO", "LIBERAÇÃO"],
+    DATA: ["DATA"],
+    EMPREITEIRA: ["EMPREITEIRA", "EMPRESA"],
+    OBRA: ["OBRA", "PROJETO"],
+    QTDE: ["QTDE", "QUANTIDADE"],
+    SALDO: ["SALDO", "RESTANTE"]
+  };
 
-  const tabela = document.querySelector('#tabela tbody');
-  const novaLinha = tabela.insertRow();
+  const novoObj = {};
 
-  novaLinha.innerHTML = `
-    <td>${liberacao}</td>
-    <td>${data}</td>
-    <td>${empreiteira}</td>
-    <td>${obra}</td>
-    <td>${qtde}</td>
-    <td>${saldo}</td>
-  `;
+  for (const campo in camposEsperados) {
+    const alternativas = camposEsperados[campo];
+    for (const chave in obj) {
+      const chaveNormalizada = normalizarCabecalho(chave);
+      if (alternativas.some(alt => normalizarCabecalho(alt) === chaveNormalizada)) {
+        novoObj[campo] = obj[chave];
+      }
+    }
+  }
 
-  document.getElementById('formulario').reset();
+  return novoObj;
+}
 
-  function importarExcel() {
+function importarExcel() {
   const input = document.getElementById('excelFile');
   const file = input.files[0];
   if (!file) {
@@ -35,11 +46,12 @@ document.getElementById('formulario').addEventListener('submit', function(event)
     const data = new Uint8Array(e.target.result);
     const workbook = XLSX.read(data, { type: 'array' });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const json = XLSX.utils.sheet_to_json(sheet);
+    const jsonOriginal = XLSX.utils.sheet_to_json(sheet);
 
     const tabela = document.querySelector('#tabela tbody');
 
-    json.forEach(linha => {
+    jsonOriginal.forEach(linhaOriginal => {
+      const linha = mapearCampos(linhaOriginal);
       const novaLinha = tabela.insertRow();
       novaLinha.innerHTML = `
         <td>${linha.LIBERACAO || ''}</td>
@@ -54,5 +66,3 @@ document.getElementById('formulario').addEventListener('submit', function(event)
 
   reader.readAsArrayBuffer(file);
 }
-
-});
