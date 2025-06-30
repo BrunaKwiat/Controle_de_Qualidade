@@ -15,6 +15,8 @@
       <label>Obra: <input type="text" id="obra" required></label>
       <label>Quantidade: <input type="number" id="qtde" required></label>
       <label>Saldo: <input type="number" id="saldo" required></label>
+      <input type="file" id="excelFile" accept=".xlsx" />
+      <button onclick="importarExcel()">Importar Excel</button>
       <button type="submit">Salvar</button>
     </form>
 
@@ -34,6 +36,7 @@
     </table>
   </div>
 
+   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
